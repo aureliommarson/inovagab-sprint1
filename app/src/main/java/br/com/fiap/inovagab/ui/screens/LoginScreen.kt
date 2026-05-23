@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,10 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(onNavigate: (String) -> Unit) {
@@ -25,6 +28,24 @@ fun LoginScreen(onNavigate: (String) -> Unit) {
 
     // Permite rolar a tela quando o conteúdo ultrapassa a altura disponível
     val scrollState = rememberScrollState()
+
+    // Obtem uma instância do Firebase
+    val autentica = FirebaseAuth.getInstance()
+
+    // Cria uma variável de estado para
+    // controlar a exibição de um indicador de progresso
+    var estaCarregando by remember {
+        mutableStateOf(false)
+    }
+
+    // Verifica se o usuário já está autenticado
+    if (autentica.currentUser != null) {
+        when (autentica.currentUser?.email) {
+            "operador@aguiabranca.com.br" -> onNavigate("OPERADOR")
+            "gestor@aguiabranca.com.br" -> onNavigate("GESTOR")
+            "lider@aguiabranca.com.br" -> onNavigate("LIDER")
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -59,6 +80,9 @@ fun LoginScreen(onNavigate: (String) -> Unit) {
             value = email,
             onValueChange = { email = it; errorMessage = "" },
             label = { Text("E-mail corporativo") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            ),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp)
@@ -95,24 +119,37 @@ fun LoginScreen(onNavigate: (String) -> Unit) {
             onClick = {
                 if (password.isBlank()) {
                     errorMessage = "Digite uma senha"
-                } else if (password == "0000") {
-                    when (email.trim().lowercase()) {
-                        "operador@aguiabranca.com.br" -> onNavigate("OPERADOR")
-                        "gestor@aguiabranca.com.br" -> onNavigate("GESTOR")
-                        "lider@aguiabranca.com.br" -> onNavigate("LIDER")
-                        else -> errorMessage = "Usuário não encontrado.\nTente: operador@aguiabranca.com.br"
-                    }
-                } else {
-                    errorMessage = "Senha incorreta\nSenha padrão: 0000"
+                } else if (email.isBlank()) {
+                    errorMessage = "Digite uma email válido"
+                } else{
+                    autentica.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { tarefa ->
+                            estaCarregando = false
+                            if (tarefa.isSuccessful){
+                                when (email.trim().lowercase()) {
+                                    "operador@aguiabranca.com.br" -> onNavigate("OPERADOR")
+                                    "gestor@aguiabranca.com.br" -> onNavigate("GESTOR")
+                                    "lider@aguiabranca.com.br" -> onNavigate("LIDER")
+                                }
+                            } else {
+                                errorMessage = "Usuário ou senha incorretos."
+                            }
+                        }
                 }
             },
             modifier = Modifier.fillMaxWidth().height(52.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2C59)),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Entrar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            if (estaCarregando){
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Entrar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
-
         Spacer(modifier = Modifier.height(48.dp))
 
         // Painel de acesso rápido para testes
