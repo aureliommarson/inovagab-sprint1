@@ -15,10 +15,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.fiap.inovagab.ui.viewmodel.InnovationViewModel
 import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LiderDashboardScreen(viewModel: InnovationViewModel, onBack: () -> Unit) {
+fun LiderDashboardScreen(
+    viewModel: InnovationViewModel,
+    onBack: () -> Unit,
+    onLogout: () -> Unit
+) {
     // Busca os dados de projetos e diretrizes na ViewModel
     val projects by viewModel.projects.collectAsState()
     val guidelines by viewModel.guidelines.collectAsState()
@@ -182,6 +188,27 @@ fun LiderDashboardScreen(viewModel: InnovationViewModel, onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botão de Logout
+            Button(
+                onClick = {
+                    FirebaseAuth.getInstance().signOut()
+                    onLogout()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFC62828)
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "Sair da conta",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

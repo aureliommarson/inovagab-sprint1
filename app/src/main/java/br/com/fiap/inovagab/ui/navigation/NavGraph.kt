@@ -34,17 +34,47 @@ fun InovaGabNavGraph(viewModel: InnovationViewModel) {
 
         // Rota do painel do Operador
         composable(Screen.Operador.route) {
-            OperadorDashboardScreen(viewModel, onBack = { navController.popBackStack() })
+            OperadorDashboardScreen(
+                viewModel,
+                onBack = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
         // Rota do painel do Gestor
         composable(Screen.Gestor.route) {
-            GestorDashboardScreen(viewModel, onBack = { navController.popBackStack() })
+            GestorDashboardScreen(
+                viewModel,
+                onBack = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
         // Rota do painel do Líder
         composable(Screen.Lider.route) {
-            LiderDashboardScreen(viewModel, onBack = { navController.popBackStack() })
+            LiderDashboardScreen(
+                viewModel,
+                onBack = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }

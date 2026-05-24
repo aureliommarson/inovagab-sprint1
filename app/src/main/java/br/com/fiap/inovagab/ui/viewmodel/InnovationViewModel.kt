@@ -2,63 +2,82 @@ package br.com.fiap.inovagab.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.fiap.inovagab.data.FirebaseProvider
 import br.com.fiap.inovagab.data.model.CorporateProject
 import br.com.fiap.inovagab.data.model.InnovationIdea
 import br.com.fiap.inovagab.data.model.StrategicGuideline
-import br.com.fiap.inovagab.data.repository.InnovationRepository
-import br.com.fiap.inovagab.data.repository.MockInnovationRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import br.com.fiap.inovagab.data.repository.CorporateProjectRepository
+import br.com.fiap.inovagab.data.repository.InnovationIdeaRepository
+import br.com.fiap.inovagab.data.repository.StrategicGuidelineRepository
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
+import com.google.firebase.database.ServerValue
 
 class InnovationViewModel(
-    private val repository: InnovationRepository = MockInnovationRepository()
+    private val ideaRepository: InnovationIdeaRepository = FirebaseProvider.innovationIdeaRepository,
+    private val guidelineRepository: StrategicGuidelineRepository = FirebaseProvider.strategicGuidelineRepository,
+    private val projectRepository: CorporateProjectRepository = FirebaseProvider.corporateProjectRepository
 ) : ViewModel() {
 
-    private val _ideas = MutableStateFlow<List<InnovationIdea>>(emptyList())
-    val ideas: StateFlow<List<InnovationIdea>> = _ideas
+    // O stateIn converte o Flow frio do Firebase em um StateFlow quente para a UI do Android
+    // O Firebase atualiza os flows automaticamente sempre que um dado mudar na nuvem.
+    val ideas: StateFlow<List<InnovationIdea>> = ideaRepository.getIdeas()
+        .stateIn(
+            scope = viewModelScope,
 
-    private val _guidelines = MutableStateFlow<List<StrategicGuideline>>(emptyList())
-    val guidelines: StateFlow<List<StrategicGuideline>> = _guidelines
+            // Economiza a internet do usuário. Se ele fechar o app ou a tela ficar em segundo plano
+            // por mais de 5 segundos, o app cancela a escuta do Firebase automaticamente.
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    private val _projects = MutableStateFlow<List<CorporateProject>>(emptyList())
-    val projects: StateFlow<List<CorporateProject>> = _projects
+    val guidelines: StateFlow<List<StrategicGuideline>> = guidelineRepository.getGuidelines()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    init {
-        refreshAllData()
-    }
-
-    fun refreshAllData() {
-        viewModelScope.launch {
-            _ideas.value = repository.fetchIdeas()
-            _guidelines.value = repository.fetchGuidelines()
-            _projects.value = repository.fetchProjects()
-        }
-    }
+    val projects: StateFlow<List<CorporateProject>> = projectRepository.getProjects()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     // Registra uma nova ideia no banco de dados com status Pendente
     fun sendNewIdea(title: String, desc: String, author: String, category: String) {
         viewModelScope.launch {
             val idea = InnovationIdea(
-                id = (ideas.value.size + 1).toString(),
+                id = UUID.randomUUID().toString(), // Gera chaves alfa-numéricas seguras para nuvem
                 title = title,
                 description = desc,
                 author = author,
                 status = "Pendente",
                 category = category,
-                createdAt = "20/05/2026"
+                // O Firebase reconhece essa chave e injeta o milisegundo exato no servidor
+                createdAt = ServerValue.TIMESTAMP
             )
-            if (repository.insertIdea(idea)) refreshAllData()
+            ideaRepository.saveIdea(idea)
         }
     }
 
     // Altera o status da ideia para Aprovado e cria um novo projeto corporativo
     fun approveIdea(idea: InnovationIdea) {
         viewModelScope.launch {
-            repository.updateIdeaStatus(idea.id, "Aprovado")
+            // Atualiza o nó da ideia modificando apenas o status e a data de aprovação
+            val updatedIdea = idea.copy(
+                status = "Aprovado",
+                approvedAt = ServerValue.TIMESTAMP // Captura o milisegundo do momento da aprovação
+            )
+
+            ideaRepository.saveIdea(updatedIdea)
 
             val project = CorporateProject(
-                id = (projects.value.size + 1).toString(),
+                id = UUID.randomUUID().toString(),
                 title = idea.title,
                 description = idea.description,
                 status = "Planejamento",
@@ -67,24 +86,31 @@ class InnovationViewModel(
                 executionDeadline = "A definir",
                 productivityGain = 0
             )
-            repository.insertProject(project)
-            refreshAllData()
+            projectRepository.saveProject(project)
         }
     }
 
-    // Altera o status da ideia para Recusado e atualiza a interface
+    // Altera o status da ideia para Recusado
     fun rejectIdea(idea: InnovationIdea) {
         viewModelScope.launch {
-            repository.updateIdeaStatus(idea.id, "Recusado")
-            refreshAllData()
+            val updatedIdea = idea.copy(status = "Recusado")
+            ideaRepository.saveIdea(updatedIdea)
         }
     }
 
     // Grava as novas métricas de progresso e finanças do projeto
     fun updateProjectValues(id: String, investment: Double, finReturn: Double, prodGain: Int, status: String) {
         viewModelScope.launch {
-            if (repository.updateProjectMetrics(id, investment, finReturn, prodGain, status)) {
-                refreshAllData()
+            // Localiza o projeto atual para preservar o título e descrição originais
+            val currentProject = projects.value.find { it.id == id }
+            if (currentProject != null) {
+                val updatedProject = currentProject.copy(
+                    investment = investment,
+                    financialReturn = finReturn,
+                    productivityGain = prodGain,
+                    status = status
+                )
+                projectRepository.saveProject(updatedProject)
             }
         }
     }
@@ -93,18 +119,18 @@ class InnovationViewModel(
     fun publishGuideline(title: String, desc: String) {
         viewModelScope.launch {
             val newGuideline = StrategicGuideline(
-                id = (guidelines.value.size + 1).toString(),
+                id = UUID.randomUUID().toString(),
                 title = title,
                 description = desc
             )
-            if (repository.createGuideline(newGuideline)) refreshAllData()
+            guidelineRepository.saveGuideline(newGuideline)
         }
     }
 
     // Exclui uma diretriz estratégica pelo seu ID
     fun removeGuideline(id: String) {
         viewModelScope.launch {
-            if (repository.deleteGuideline(id)) refreshAllData()
+            guidelineRepository.removeGuideline(id)
         }
     }
 }
