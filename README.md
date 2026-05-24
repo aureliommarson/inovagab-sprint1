@@ -15,12 +15,8 @@ Este projeto foi construído utilizando as ferramentas e padrões mais modernos 
 * **Gerenciamento de Estado (State Management):** `StateFlow` e `MutableStateFlow` nativos do Kotlin, garantindo que a UI (View) reaja instantaneamente a qualquer mutação na camada de dados.
 * **Assincronismo:** Kotlin Coroutines (`suspend functions` e `viewModelScope`) para garantir que as requisições ao repositório não bloqueiem a Main Thread (UI Thread).
 * **Navegação:** Jetpack Navigation Compose para roteamento de telas e passagem de estado.
-
-### 💾 Estratégia de Dados (Mock Data - Sprint 1)
-Para viabilizar a entrega MVP da Sprint 1 e focar na validação da interface e fluxo de negócio, a persistência de dados foi implementada através de um **Repositório Mockado em Memória** (`MockInnovationRepository`). 
-* **O truque da Reatividade:** Como o `StateFlow` do Kotlin verifica a igualdade de referências para emitir novos estados, os métodos do repositório utilizam `.toList()` para forçar a alocação de uma nova cópia das listas na memória, garantindo que o Jetpack Compose dispare a recomposição (Recomposition) imediata da tela após qualquer operação de CRUD (como aprovar ideias ou publicar diretrizes).
-
----
+* **Autenticação:** Firebase Authentication para controle de acesso.
+* **Persistência de Dados:** Firebase Realtime Database para armazenamento de dados.
 
 ## 🚀 Como Executar e Configurar o Emulador
 
@@ -42,7 +38,7 @@ O sistema possui controle de roteamento condicional baseado na triagem de perfil
 * **Perfil Gestor (Tático):** `gestor@aguiabranca.com.br`
 * **Perfil Líder (Executivo):** `lider@aguiabranca.com.br`
 
-**Senha padrão (Validação de Input):** `0000`
+**Senha padrão (Validação de Input):** `000000`
 
 ---
 
@@ -52,8 +48,9 @@ A codebase segue a estruturação modular focada no MVVM:
 
 ### 1. Camada de Dados (`data`)
 * **`model/InnovationModels.kt`:** Data classes que mapeiam as entidades do sistema: `UserRole` (Enum), `InnovationIdea` (inputs da base operacional com data de criação e homologação), `StrategicGuideline` (diretrizes macro) e `CorporateProject` (projetos aprovados com consolidação financeira).
-* **`repository/InnovationRepository.kt`:** Interface (contrato) que define as funções suspensas (`suspend`) de I/O de dados, preparando o terreno para a futura integração com APIs REST (Retrofit/Ktor) nas próximas Sprints.
-* **`repository/MockInnovationRepository.kt`:** Implementação em memória da interface acima, gerenciando `MutableLists` encapsuladas e simulando a latência de rede.
+* **`dao/`:** Classes DAO que realizam as operções no banco de dados
+* **`repository/`:** Classes intermidárias entre as classes DAO e a classe cliente, separando a camada de acesso aos dados das regras de negócio
+* **`FirebaseProvedir.kt`:** Objeto que provê a conexão com o banco de dados Firebase Realtime Database
 
 ### 2. Camada Lógica e de Estado (`ui/viewmodel`)
 * **`InnovationViewModel.kt`:** Classe que estende `ViewModel`. Centraliza a regra de negócio (como transformar uma "Ideia Aprovada" em um "Projeto" de forma transacional). Mantém os `StateFlows` públicos que são coletados (observados) pela UI através do `collectAsState()`.
