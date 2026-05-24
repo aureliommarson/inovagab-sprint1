@@ -55,12 +55,18 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.kotlinx.coroutines.android)
 
     // Bibliotecas necessárias para a Navegação e os ViewModels
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.lifecycle.viewmodel.compose)
+
+    // Bibliotecas Firebase
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
 
 
     // Testes e ferramentas de debug

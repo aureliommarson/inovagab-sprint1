@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import br.com.fiap.inovagab.data.model.getFormattedDate
 import br.com.fiap.inovagab.ui.viewmodel.InnovationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,11 +135,11 @@ fun OperadorDashboardScreen(viewModel: InnovationViewModel, onBack: () -> Unit) 
                             Text(idea.description, fontSize = 13.sp, color = Color.DarkGray)
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            Text("Criado em: ${idea.createdAt}", fontSize = 12.sp, color = Color.Gray)
+                            Text("Criado em: ${idea.getFormattedDate()}", fontSize = 12.sp, color = Color.Gray)
 
                             if (idea.approvedAt != null) {
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("Atualizado em: ${idea.approvedAt}", fontSize = 12.sp, color = Color.Gray)
+                                Text("Atualizado em: ${idea.approvedAt.getFormattedDate()}", fontSize = 12.sp, color = Color.Gray)
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
