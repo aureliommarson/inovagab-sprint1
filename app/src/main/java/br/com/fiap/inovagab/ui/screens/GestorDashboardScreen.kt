@@ -43,7 +43,9 @@ fun GestorDashboardScreen(
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp)
                     )
                 },
                 navigationIcon = {
@@ -60,136 +62,152 @@ fun GestorDashboardScreen(
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(
+                top = 16.dp,
+                bottom = 32.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ){
 
-            Text(
-                text = "Triagem de Ideias Recebidas",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            item {
+                Text(
+                    text = "Triagem de Ideias Recebidas",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             // Lista de ideias com status Pendente
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                items(ideas.filter { it.status == "Pendente" }) { idea ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
+            items(ideas.filter { it.status == "Pendente" }) { idea ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                            horizontalAlignment = Alignment.Start
+                        Text(idea.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text("Divisão: ${idea.category}", fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(idea.description, fontSize = 13.sp, color = Color.DarkGray)
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Botões de aprovação e recusa da ideia
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text(idea.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text("Divisão: ${idea.category}", fontSize = 12.sp, color = Color.Gray)
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(idea.description, fontSize = 13.sp, color = Color.DarkGray)
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Botões de aprovação e recusa da ideia
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Button(
-                                    onClick = { viewModel.rejectIdea(idea) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEBEE), contentColor = Color(0xFFC62828)),
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Recusar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                }
-
-                                Button(
-                                    onClick = { viewModel.approveIdea(idea) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8F5E9), contentColor = Color(0xFF2E7D32)),
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Aprovar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Projetos & Iniciativas Ativas",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Lista de projetos e iniciativas ativas
-            LazyColumn(modifier = Modifier.weight(1.2f).fillMaxWidth()) {
-                items(projects) { project ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Text(project.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(project.description, fontSize = 13.sp, color = Color.DarkGray)
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text("Eficiência Mapeada: ${project.productivityGain}%", fontSize = 12.sp, color = Color.Gray)
-                            Text("Capital Investido: R$ ${project.investment}", fontSize = 12.sp, color = Color.Gray)
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            Text("Status: ${project.status}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F2C59))
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Botão para abrir o modal de atualização do projeto
                             Button(
-                                onClick = { selectedProjectForEdit = project },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2C59)),
-                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { viewModel.rejectIdea(idea) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEBEE), contentColor = Color(0xFFC62828)),
+                                modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Text("Atualizar Métricas", fontSize = 13.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("Recusar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+
+                            Button(
+                                onClick = { viewModel.approveIdea(idea) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8F5E9), contentColor = Color(0xFF2E7D32)),
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Aprovar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Projetos & Iniciativas Ativas",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Lista de projetos e iniciativas ativas
+            items(projects) { project ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(project.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(project.description, fontSize = 13.sp, color = Color.DarkGray)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text("Eficiência Mapeada: ${project.productivityGain}%", fontSize = 12.sp, color = Color.Gray)
+                        Text("Capital Investido: R$ ${project.investment}", fontSize = 12.sp, color = Color.Gray)
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text("Status: ${project.status}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F2C59))
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Botão para abrir o modal de atualização do projeto
+                        Button(
+                            onClick = { selectedProjectForEdit = project },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2C59)),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Atualizar Métricas", fontSize = 13.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
 
             // Botão de Logout
-            Button(
-                onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    onLogout()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC62828)
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = "Sair da conta",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+            item {
+                Button(
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFC62828)
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Sair da conta",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

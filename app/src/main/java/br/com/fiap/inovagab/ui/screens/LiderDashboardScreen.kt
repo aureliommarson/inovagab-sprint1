@@ -45,7 +45,9 @@ fun LiderDashboardScreen(
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp)
                     )
                 },
                 navigationIcon = {
@@ -63,152 +65,197 @@ fun LiderDashboardScreen(
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
-
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(
+                top = 16.dp,
+                bottom = 32.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ){
             // Título da seção de métricas financeiras
-            Text(
-                text = "Métricas Consolidadas",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            item {
+                Text(
+                    text = "Métricas Consolidadas",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             // Exibe capital alocado e retorno lado a lado com tamanhos iguais
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Card(modifier = Modifier.weight(1f).fillMaxHeight(), colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Capital Alocado", fontSize = 12.sp, color = Color.Gray)
-                        Text("R$ ${String.format(Locale.getDefault(), "%.2f", totalInvestment)}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Capital Alocado", fontSize = 12.sp, color = Color.Gray)
+                            Text(
+                                "R$ ${
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.2f",
+                                        totalInvestment
+                                    )
+                                }", fontWeight = FontWeight.Bold, fontSize = 14.sp
+                            )
+                        }
                     }
-                }
-                Card(modifier = Modifier.weight(1f).fillMaxHeight(), colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Retorno Capturado", fontSize = 12.sp, color = Color.Gray)
-                        Text("R$ ${String.format(Locale.getDefault(), "%.2f", totalReturn)}", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF2E7D32))
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Retorno Capturado", fontSize = 12.sp, color = Color.Gray)
+                            Text(
+                                "R$ ${String.format(Locale.getDefault(), "%.2f", totalReturn)}",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = Color(0xFF2E7D32)
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
             // Mostra o percentual de produtividade ao centro
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Ganho Médio de Produtividade", fontSize = 13.sp, color = Color.DarkGray)
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(color = Color(0xFFE8EAF6), shape = RoundedCornerShape(16.dp)) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Ganho Médio de Produtividade", fontSize = 13.sp, color = Color.DarkGray)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(color = Color(0xFFE8EAF6), shape = RoundedCornerShape(16.dp)) {
+                        Text(
+                            text = "+$avgProductivity%",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = Color(0xFF3F51B5),
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+            }
+
+            // Título da seção de diretrizes
+            item {
+                Text(
+                    text = "Diretrizes Estratégicas",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Botão para criar uma nova meta da empresa
+            item {
+                Button(
+                    onClick = { showGuidelineDialog = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2C59)),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(
-                        text = "+$avgProductivity%",
+                        "Adicionar nova diretriz",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = Color(0xFF3F51B5),
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                        color = Color.White
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Título da seção de diretrizes
-            Text(
-                text = "Diretrizes Estratégicas",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Botão para criar uma nova meta da empresa
-            Button(
-                onClick = { showGuidelineDialog = true },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2C59)),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Adicionar nova diretriz", fontWeight = FontWeight.Bold, color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // Lista as metas e diretrizes com mais espaço visual
-            LazyColumn(modifier = Modifier.weight(1.5f).fillMaxWidth()) {
-                items(guidelines) { gl ->
-                    Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(gl.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(gl.description, fontSize = 13.sp, color = Color.DarkGray)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            // Botão para remover a diretriz
-                            TextButton(onClick = { viewModel.removeGuideline(gl.id) }, contentPadding = PaddingValues(0.dp)) {
-                                Text("Excluir", color = Color.Red, fontWeight = FontWeight.Bold)
-                            }
+            items(guidelines) { gl ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(gl.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(gl.description, fontSize = 13.sp, color = Color.DarkGray)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Botão para remover a diretriz
+                        TextButton(onClick = { viewModel.removeGuideline(gl.id) }, contentPadding = PaddingValues(0.dp)) {
+                            Text("Excluir", color = Color.Red, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
 
-            // Espaço maior para separar o portfólio da seção acima
-            Spacer(modifier = Modifier.height(32.dp))
+            item {
+                // Espaço maior para separar o portfólio da seção acima
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Título do portfólio de projetos
-            Text(
-                text = "Portfólio de Auditoria de Projetos",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+                // Título do portfólio de projetos
+                Text(
+                    text = "Portfólio de Auditoria de Projetos",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             // Lista os detalhes financeiros de cada projeto para auditoria
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                items(projects) { p ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(p.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
-                            Text(p.description, fontSize = 13.sp, color = Color.DarkGray)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Status: ${p.status}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                            Text("Investimento: R$ ${p.investment}", fontSize = 12.sp)
-                            Text("Retorno: R$ ${p.financialReturn}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
-                        }
+            items(projects) { p ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(p.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
+                        Text(p.description, fontSize = 13.sp, color = Color.DarkGray)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Status: ${p.status}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        Text("Investimento: R$ ${p.investment}", fontSize = 12.sp)
+                        Text("Retorno: R$ ${p.financialReturn}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Botão de Logout
-            Button(
-                onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    onLogout()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC62828)
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = "Sair da conta",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+            item {
+                Button(
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFC62828)
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Sair da conta",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

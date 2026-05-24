@@ -2,6 +2,7 @@ package br.com.fiap.inovagab.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -42,7 +43,9 @@ fun OperadorDashboardScreen(
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp)
                     )
                 },
                 navigationIcon = {
@@ -64,21 +67,36 @@ fun OperadorDashboardScreen(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(
+                top = 16.dp,
+                bottom = 32.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ){
 
-            Text(
-                text = "Diretrizes Estratégicas Vigentes",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            item {
+                Text(
+                    text = "Diretrizes Estratégicas Vigentes",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-            guidelines.forEach { item ->
-                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
+            items(guidelines) { item ->
+                Card(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp)) {
                     Column(
-                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(item.title, fontWeight = FontWeight.Bold, color = Color(0xFF0F2C59), fontSize = 14.sp)
@@ -88,28 +106,32 @@ fun OperadorDashboardScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Minhas Ideias & Dores",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Minhas Ideias & Dores",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val filterOptions = listOf("Todas", "Passageiros", "Logística", "Comércio")
-                items(filterOptions) { filter ->
-                    FilterChip(
-                        selected = (selectedFilter == filter),
-                        onClick = { selectedFilter = filter },
-                        label = { Text(filter) }
-                    )
+
+            item {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val filterOptions = listOf("Todas", "Passageiros", "Logística", "Comércio")
+                    items(filterOptions) { filter ->
+                        FilterChip(
+                            selected = (selectedFilter == filter),
+                            onClick = { selectedFilter = filter },
+                            label = { Text(filter) }
+                        )
+                    }
                 }
             }
 
@@ -119,84 +141,86 @@ fun OperadorDashboardScreen(
                 ideas.filter { it.category.equals(selectedFilter, ignoreCase = true) }
             }
 
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                items(filteredIdeas) { idea ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            items(filteredIdeas) { idea ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    // Estrutura alinhada à esquerda com espaçamentos proporcionais
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start
                     ) {
-                        // Estrutura alinhada à esquerda com espaçamentos proporcionais
-                        Column(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                            horizontalAlignment = Alignment.Start
+                        Text(idea.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text("Divisão: ${idea.category}", fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(idea.description, fontSize = 13.sp, color = Color.DarkGray)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text("Criado em: ${idea.getFormattedDate()}", fontSize = 12.sp, color = Color.Gray)
+
+                        if (idea.approvedAt != null) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text("Atualizado em: ${idea.approvedAt.getFormattedDate()}", fontSize = 12.sp, color = Color.Gray)
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Badge de status encapsulado em um Surface para destaque visual limpo
+                        val statusColor = when (idea.status) {
+                            "Aprovado" -> Color(0xFFE8F5E9)
+                            "Recusado" -> Color(0xFFFFEBEE)
+                            else -> Color(0xFFFFF3E0)
+                        }
+                        val textColor = when (idea.status) {
+                            "Aprovado" -> Color(0xFF2E7D32)
+                            "Recusado" -> Color(0xFFC62828)
+                            else -> Color(0xFFEF6C00)
+                        }
+
+                        Surface(
+                            color = statusColor,
+                            shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text(idea.title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F2C59))
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text("Divisão: ${idea.category}", fontSize = 12.sp, color = Color.Gray)
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(idea.description, fontSize = 13.sp, color = Color.DarkGray)
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            Text("Criado em: ${idea.getFormattedDate()}", fontSize = 12.sp, color = Color.Gray)
-
-                            if (idea.approvedAt != null) {
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("Atualizado em: ${idea.approvedAt.getFormattedDate()}", fontSize = 12.sp, color = Color.Gray)
-                            }
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            // Badge de status encapsulado em um Surface para destaque visual limpo
-                            val statusColor = when (idea.status) {
-                                "Aprovado" -> Color(0xFFE8F5E9)
-                                "Recusado" -> Color(0xFFFFEBEE)
-                                else -> Color(0xFFFFF3E0)
-                            }
-                            val textColor = when (idea.status) {
-                                "Aprovado" -> Color(0xFF2E7D32)
-                                "Recusado" -> Color(0xFFC62828)
-                                else -> Color(0xFFEF6C00)
-                            }
-
-                            Surface(
-                                color = statusColor,
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text(
-                                    text = idea.status,
-                                    color = textColor,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
-                            }
+                            Text(
+                                text = idea.status,
+                                color = textColor,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Botão de Logout
-            Button(
-                onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    onLogout()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC62828)
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = "Sair da conta",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+            item {
+                Button(
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFC62828)
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Sair da conta",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
