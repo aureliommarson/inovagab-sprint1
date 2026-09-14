@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import br.com.fiap.inovagab.data.model.StrategicGuideline
 import br.com.fiap.inovagab.ui.viewmodel.InnovationViewModel
 import java.util.Locale
 import com.google.firebase.auth.FirebaseAuth
@@ -29,6 +30,7 @@ fun LiderDashboardScreen(
     val projects by viewModel.projects.collectAsState()
     val guidelines by viewModel.guidelines.collectAsState()
     var showGuidelineDialog by remember { mutableStateOf(false) }
+    var selectedGuidelineForEdit by remember { mutableStateOf<StrategicGuideline?>(null) }
 
     // Soma os valores financeiros para o dashboard
     val totalInvestment = projects.sumOf { it.investment }
@@ -194,9 +196,20 @@ fun LiderDashboardScreen(
                         Text(gl.description, fontSize = 13.sp, color = Color.DarkGray)
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Botão para remover a diretriz
-                        TextButton(onClick = { viewModel.removeGuideline(gl.id) }, contentPadding = PaddingValues(0.dp)) {
-                            Text("Excluir", color = Color.Red, fontWeight = FontWeight.Bold)
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            TextButton(
+                                onClick = { selectedGuidelineForEdit = gl },
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text("Editar", color = Color(0xFF0F2C59), fontWeight = FontWeight.Bold)
+                            }
+
+                            TextButton(
+                                onClick = { viewModel.removeGuideline(gl.id) },
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text("Excluir", color = Color.Red, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -285,6 +298,45 @@ fun LiderDashboardScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showGuidelineDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    if (selectedGuidelineForEdit != null) {
+        val guideline = selectedGuidelineForEdit!!
+        var title by remember(guideline.id) { mutableStateOf(guideline.title) }
+        var description by remember(guideline.id) { mutableStateOf(guideline.description) }
+
+        AlertDialog(
+            onDismissRequest = { selectedGuidelineForEdit = null },
+            title = { Text("Editar Diretriz") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("Título") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Descrição") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (title.isNotBlank()) {
+                        viewModel.updateGuideline(guideline, title, description)
+                        selectedGuidelineForEdit = null
+                    }
+                }) { Text("Salvar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { selectedGuidelineForEdit = null }) { Text("Cancelar") }
             }
         )
     }
