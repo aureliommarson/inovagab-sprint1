@@ -27,6 +27,27 @@ Android nativo:
 
 ---
 
+## Arquitetura e Fluxo da Aplicação
+
+```mermaid
+flowchart TD
+    Operador[Operador] --> App[Jetpack Compose\nTelas e Navigation]
+    Gestor[Gestor] --> App
+    Lider[Líder] --> App
+
+    App --> VM[InnovationViewModel\nStateFlow e regras de negócio]
+    VM --> Repositories[Repositories]
+    Repositories --> Dao[DAOs]
+    Dao --> Auth[Firebase Authentication]
+    Dao --> Database[Firebase Realtime Database\nideas · guidelines · projects]
+```
+
+O Operador registra ideias e consulta diretrizes. O Gestor prioriza e avalia
+ideias, acompanha projetos e consulta diretrizes. O Líder administra as
+diretrizes e acompanha os indicadores do portfólio.
+
+---
+
 ## 🚀 Como Executar e Configurar o Emulador
 
 Para testar o aplicativo sem erros de renderização ou quebras visuais no Windows, é fundamental utilizar uma imagem de sistema Android estável.
