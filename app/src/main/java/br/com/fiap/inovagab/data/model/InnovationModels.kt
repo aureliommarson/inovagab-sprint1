@@ -16,6 +16,7 @@ data class InnovationIdea(
     val author: String = "",
     val status: String = "Pendente", // "Pendente" ou "Aprovado"
     val category: String = "Passageiros", // "Passageiros", "Comércio" ou "Logística"
+    val priority: String = "Média", // "Alta", "Média" ou "Baixa"
 
     // Campos de data para rastrear o tempo de resposta do funil
     val createdAt: Any = ServerValue.TIMESTAMP,         // Data em que o operador registrou a ocorrência
