@@ -4,6 +4,7 @@ import com.google.firebase.database.ServerValue
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.text.NumberFormat
 
 // Os três perfis de acesso obrigatórios determinados pelo desafio do Grupo Águia Branca
 enum class UserRole { OPERADOR, GESTOR, LIDER }
@@ -50,3 +51,7 @@ fun Any?.getFormattedDate(): String {
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return sdf.format(date)
 }
+
+fun Double.toBrazilianCurrency(): String = NumberFormat
+    .getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
+    .format(this)
