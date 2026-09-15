@@ -1,6 +1,8 @@
 package br.com.fiap.inovagab.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.fiap.inovagab.data.model.CorporateProject
 import br.com.fiap.inovagab.data.model.InnovationIdea
+import br.com.fiap.inovagab.data.model.toBrazilianCurrency
 import br.com.fiap.inovagab.ui.viewmodel.InnovationViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -88,9 +91,13 @@ fun GestorDashboardScreen(
             }
 
             // Lista de ideias com status Pendente
+            val pendingIdeas = ideas.filter { it.status == "Pendente" }.sortedBy { priorityRank(it.priority) }
+            if (pendingIdeas.isEmpty()) {
+                item { Text("Não há ideias pendentes de avaliação.", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 16.dp)) }
+            }
             items(
-                ideas.filter { it.status == "Pendente" }
-                    .sortedBy { priorityRank(it.priority) }
+                pendingIdeas,
+                key = { it.id }
             ) { idea ->
                 Card(
                     modifier = Modifier
@@ -164,7 +171,7 @@ fun GestorDashboardScreen(
                 )
             }
 
-            items(guidelines) { guideline ->
+            items(guidelines, key = { it.id }) { guideline ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -195,7 +202,7 @@ fun GestorDashboardScreen(
                 )
             }
 
-            items(projects) { project ->
+            items(projects, key = { it.id }) { project ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -216,7 +223,7 @@ fun GestorDashboardScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text("Eficiência Mapeada: ${project.productivityGain}%", fontSize = 12.sp, color = Color.Gray)
-                        Text("Capital Investido: R$ ${project.investment}", fontSize = 12.sp, color = Color.Gray)
+                        Text("Capital investido: ${project.investment.toBrazilianCurrency()}", fontSize = 12.sp, color = Color.Gray)
 
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -272,7 +279,7 @@ fun GestorDashboardScreen(
             onDismissRequest = { selectedProjectForEdit = null },
             title = { Text("Atualizar Progresso Corporativo") },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     OutlinedTextField(value = investStr, onValueChange = { investStr = it }, label = { Text("Investimento (R$)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(value = returnStr, onValueChange = { returnStr = it }, label = { Text("Retorno Real (R$)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)

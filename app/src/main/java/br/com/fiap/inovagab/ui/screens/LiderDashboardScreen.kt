@@ -1,6 +1,8 @@
 package br.com.fiap.inovagab.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.fiap.inovagab.data.model.StrategicGuideline
+import br.com.fiap.inovagab.data.model.toBrazilianCurrency
 import br.com.fiap.inovagab.ui.viewmodel.InnovationViewModel
 import java.util.Locale
 import com.google.firebase.auth.FirebaseAuth
@@ -184,7 +187,10 @@ fun LiderDashboardScreen(
             }
 
             // Lista as metas e diretrizes com mais espaço visual
-            items(guidelines) { gl ->
+            if (guidelines.isEmpty()) {
+                item { Text("Nenhuma diretriz publicada.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
+            items(guidelines, key = { it.id }) { gl ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -230,7 +236,10 @@ fun LiderDashboardScreen(
             }
 
             // Lista os detalhes financeiros de cada projeto para auditoria
-            items(projects) { p ->
+            if (projects.isEmpty()) {
+                item { Text("Nenhum projeto no portfólio.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
+            items(projects, key = { it.id }) { p ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -244,8 +253,8 @@ fun LiderDashboardScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("Status: ${p.status}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        Text("Investimento: R$ ${p.investment}", fontSize = 12.sp)
-                        Text("Retorno: R$ ${p.financialReturn}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                        Text("Investimento: ${p.investment.toBrazilianCurrency()}", fontSize = 12.sp)
+                        Text("Retorno: ${p.financialReturn.toBrazilianCurrency()}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
                     }
                 }
             }
@@ -282,7 +291,7 @@ fun LiderDashboardScreen(
             onDismissRequest = { showGuidelineDialog = false },
             title = { Text("Nova Diretriz") },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     OutlinedTextField(value = gTitle, onValueChange = { gTitle = it }, label = { Text("Título") }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(value = gDesc, onValueChange = { gDesc = it }, label = { Text("Descrição") }, modifier = Modifier.fillMaxWidth())
@@ -311,7 +320,7 @@ fun LiderDashboardScreen(
             onDismissRequest = { selectedGuidelineForEdit = null },
             title = { Text("Editar Diretriz") },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     OutlinedTextField(
                         value = title,
                         onValueChange = { title = it },
